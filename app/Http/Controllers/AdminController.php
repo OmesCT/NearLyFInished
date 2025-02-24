@@ -16,8 +16,8 @@ class AdminController extends Controller
             return Inertia::location('/login'); // ใช้ Inertia::location เพื่อ redirect
         }
 
-        $reservations = Reservation::select('id', 'first_name', 'phone', 'table_id')->get();
-        $tables = Table::select('id', 'seat', 'available')->get();
+        $reservations = Reservations::select('id', 'first_name', 'phone', 'table_id')->get();
+        $tables = Tables::select('id', 'seat', 'available')->get();
 
         return Inertia::render('Admin/Panel', [
             'reservations' => $reservations,

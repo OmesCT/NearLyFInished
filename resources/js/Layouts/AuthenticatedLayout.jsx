@@ -82,8 +82,6 @@ export default function AuthenticatedLayout({ header, children }) {
                                         </Dropdown.Link>
                                         <Dropdown.Link
                                             href={route('admin.panel')}
-                                            method="post"
-                                            as="button"
                                         >
                                             Admin Account
                                         </Dropdown.Link>
