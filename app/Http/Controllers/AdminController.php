@@ -50,25 +50,16 @@ class AdminController extends Controller
 
     public function edit($id)
     {
-        $reservation = Reservations::find($id);
-        if (!$reservation) {
-            return redirect()->route('admin.panel')->with('error', 'Reservation not found.');
-        }
-
-        return Inertia::render('Admin/Edit', [
-            'reservation' => $reservation   
-        ]);
+        $reservation = Reservations::findOrFail($id);
+        return Inertia::render('Admin/EditCustomer', ['reservations' => $reservation]);
     }
 
     public function update(Request $request, $id)
     {
-        $reservation = Reservations::find($id);
-        if ($reservation) {
-            $reservation->update($request->only('first_name', 'email'));
-            return redirect()->route('admin.panel')->with('success', 'Reservation updated successfully.');
-        }
+        $reservation = Reservations::findOrFail($id);
+        $reservation->update($request->all());
 
-        return redirect()->route('admin.panel')->with('error', 'Reservation not found.');
+        return redirect()->route('admin.panel', $id)->with('success', 'ข้อมูลการจองถูกอัปเดตเรียบร้อยแล้ว');
     }
 
 }

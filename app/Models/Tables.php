@@ -9,11 +9,16 @@ class Tables extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['seat', 'available'];
+    protected $fillable = [
+        'seat',
+        'available',
+        'reserved_by_user_id',
+    ];
 
+    // เพิ่มความสัมพันธ์กับโมเดล Reservations
     public function reservations()
     {
-        return $this->hasMany(Reservations::class, 'table_id');
+        return $this->hasMany(Reservations::class);
     }
 }
 

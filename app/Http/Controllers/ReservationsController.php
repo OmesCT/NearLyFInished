@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 
 class ReservationsController extends Controller
 {
+    
     public function store(Request $request)
     {
         $request->validate([
@@ -43,7 +44,7 @@ class ReservationsController extends Controller
 
             DB::commit(); // ยืนยันการทำธุรกรรม
 
-            return redirect()->route('reserve.index')->with('success', 'จองโต๊ะสำเร็จ!');
+            return redirect()->route('show', $reservation->id)->with('success', 'จองโต๊ะสำเร็จ!');
         } catch (\Exception $e) {
             DB::rollBack(); // ยกเลิกการทำธุรกรรมหากเกิดข้อผิดพลาด
             Log::error('Reservation Error: ' . $e->getMessage());
@@ -139,5 +140,15 @@ class ReservationsController extends Controller
             return redirect()->route('booking.edit', $id)->withErrors(['error' => 'เกิดข้อผิดพลาดในการอัปเดตข้อมูลการจอง']);
         }
     }
+
+    public function index()
+    {
+        $tables = Tables::all();
+        $reservations = Reservations::with('user')->get(); // ดึงข้อมูล user ด้วย
+        return Inertia::render('Shabu/Reserve', [
+            'tables' => $tables,
+            'reservations' => $reservations,
+        ]);
     }
+}
 

@@ -12,9 +12,6 @@ use App\Http\Middleware\AdminMiddleware;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
     ]);
 });
@@ -35,31 +32,26 @@ Route::middleware('auth')->group(function () {
     Route::patch('/api/tables/{id}/reserve', [ReservationsController::class, 'store']);
 
     // หน้าแสดงรายละเอียดการจอง
-    Route::get('/booking-details/{table_id}', [ReservationsController::class, 'show'])->name('booking.details');
+    Route::get('/booking-details/{id}', [ReservationsController::class, 'show'])->name('booking.details');
 
+    // เพิ่มเส้นทางสำหรับหน้าแสดงรายละเอียดการจอง
+    Route::get('/show/{id}', [ReservationsController::class, 'show'])->name('show');
 
     // หน้าสร้างการจอง
     Route::get('/create', [CreateController::class, 'showCreateForm'])->name('create');
 
     // API สำหรับการจอง
     Route::post('/reserve-table', [ReservationsController::class, 'reserveTable']);
-
-    
 });
-
-
 
 Route::middleware(['auth', AdminMiddleware::class])->group(function () {
     Route::get('/admin/panel', [AdminController::class, 'index'])->name('admin.panel');
     Route::delete('/admin/delete/{id}', [AdminController::class, 'deleteReservation'])->name('admin.delete');
     Route::get('/admin/edit/{id}', [AdminController::class, 'edit'])->name('admin.edit');
     Route::post('/admin/update/{id}', [AdminController::class, 'update'])->name('admin.update');
-
 });
 
 Route::middleware('auth')->group(function () {
-    // เส้นทางที่เพิ่มขึ้นสำหรับการแก้ไขข้อมูลการจอง
-    Route::get('/booking/{id}/edit', [ReservationsController::class, 'edit'])->name('booking.edit');
     Route::put('/booking/{id}', [ReservationsController::class, 'update'])->name('booking.update');
 });
 

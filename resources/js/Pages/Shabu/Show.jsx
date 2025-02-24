@@ -20,17 +20,15 @@ export default function Show() {
                         <p className="text-sm">Phone: {booking.phone}</p>
                         <p className="text-sm">Reserved At: {new Date(booking.reserved_at).toLocaleString()}</p>
                         <p className="text-sm">Expires At: {new Date(booking.expires_at).toLocaleString()}</p>
-
-                        {/* ปุ่มแก้ไข */}
-                        <Link
-                            href={`/booking/${booking.id}/edit`}
-                            className="mt-4 inline-block bg-blue-500 text-white py-2 px-4 rounded"
-                        >
-                            Edit
-                        </Link>
+                        <div className="flex justify-end">
+                            <Link href={route('reserve.index')} className="mt-10 bg-red-900 hover:bg-red-700 text-white px-3 py-1 rounded-md ml-2 transition-all duration-200">
+                                Back
+                            </Link>
+                        </div>
                     </CardContent>
                 </Card>
             </div>
+            <p className="text-red-500 mt-10 flex justify-center">**กรุณาบันทึกภาพหน้าจอขอท่านเพื่อแจ้งพนักงานเมื่อมาถึงร้าน</p>
         </AuthenticatedLayout>
     );
 }
