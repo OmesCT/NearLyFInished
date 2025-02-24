@@ -82,44 +82,56 @@ class ReservationsController extends Controller
             'phone' => 'required',
             'table_id' => 'required|exists:tables,id',
         ]);
-
-        DB::beginTransaction(); // ใช้ transaction เพื่อป้องกันข้อมูลผิดพลาด
-
+    
+        DB::beginTransaction(); // ใช้ transaction ป้องกันข้อมูลผิดพลาด
+    
         try {
             // ค้นหาการจองที่ต้องการแก้ไข
             $reservation = Reservations::findOrFail($id);
-
+    
+            // เก็บค่า table_id เก่าไว้ก่อน
+            $oldTableId = $reservation->table_id;
+            $newTableId = $request->table_id;
+    
             // ตรวจสอบว่ามีการเปลี่ยนแปลงโต๊ะหรือไม่
-            $isTableChanged = $reservation->table_id != $request->table_id;
-
+            $isTableChanged = $oldTableId != $newTableId;
+    
+            // หากมีการเปลี่ยนโต๊ะ ให้นำข้อมูลบางส่วนของโต๊ะเก่าย้ายไปโต๊ะใหม่
+            if ($isTableChanged) {
+                // ดึงข้อมูลจากโต๊ะเก่ามาเก็บไว้
+                $oldTable = Tables::findOrFail($oldTableId);
+    
+                // ตรวจสอบว่าโต๊ะเก่ามีการจองโดยผู้ใช้อื่นอยู่หรือไม่
+                if ($oldTable->reserved_by_user_id !== auth()->id()) {
+                    return redirect()->route('booking.edit', $id)->withErrors(['error' => 'ไม่สามารถย้ายการจองของผู้ใช้อื่นได้']);
+                }
+    
+                // อัปเดตสถานะโต๊ะเก่าให้กลับมาว่าง
+                $oldTable->update([
+                    'available' => true,
+                    'reserved_by_user_id' => null,
+                ]);
+    
+                // อัปเดตสถานะของโต๊ะใหม่ให้ไม่ว่าง และโอนข้อมูลจากโต๊ะเก่าไปยังโต๊ะใหม่
+                Tables::where('id', $newTableId)->update([
+                    'available' => false,
+                    'reserved_by_user_id' => auth()->id(),
+                ]);
+            }
+    
             // อัปเดตข้อมูลการจอง
             $reservation->update([
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
                 'email' => $request->email,
                 'phone' => $request->phone,
-                'table_id' => $request->table_id,
+                'table_id' => $newTableId,
                 'reserved_at' => now(),
                 'expires_at' => now()->addMinutes(150), // ตั้งเวลาหมดอายุอัตโนมัติ 2ชั่วโมงครึ่ง
             ]);
-
-            // หากมีการเปลี่ยนโต๊ะให้อัปเดตสถานะโต๊ะ
-            if ($isTableChanged) {
-                // อัปเดตสถานะโต๊ะเก่าให้กลับมาว่าง
-                Tables::where('id', $reservation->table_id)->update([
-                    'available' => true,
-                    'reserved_by_user_id' => null,
-                ]);
-
-                // อัปเดตสถานะโต๊ะใหม่ให้ไม่ว่าง
-                Tables::where('id', $request->table_id)->update([
-                    'available' => false,
-                    'reserved_by_user_id' => auth()->id(),
-                ]);
-            }
-
+    
             DB::commit(); // ยืนยันการทำธุรกรรม
-
+    
             return redirect()->route('booking.details', $reservation->id)->with('success', 'ข้อมูลการจองอัปเดตสำเร็จ!');
         } catch (\Exception $e) {
             DB::rollBack(); // ยกเลิกการทำธุรกรรมหากเกิดข้อผิดพลาด
@@ -127,5 +139,5 @@ class ReservationsController extends Controller
             return redirect()->route('booking.edit', $id)->withErrors(['error' => 'เกิดข้อผิดพลาดในการอัปเดตข้อมูลการจอง']);
         }
     }
-}
+    }
 

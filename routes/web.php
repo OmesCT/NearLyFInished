@@ -35,7 +35,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/api/tables/{id}/reserve', [ReservationsController::class, 'store']);
 
     // หน้าแสดงรายละเอียดการจอง
-    Route::get('/booking-details/{id}', [ReservationsController::class, 'show'])->name('booking.details');
+    Route::get('/booking-details/{table_id}', [ReservationsController::class, 'show'])->name('booking.details');
 
 
     // หน้าสร้างการจอง
@@ -43,13 +43,18 @@ Route::middleware('auth')->group(function () {
 
     // API สำหรับการจอง
     Route::post('/reserve-table', [ReservationsController::class, 'reserveTable']);
+
+    
 });
+
+
 
 Route::middleware(['auth', AdminMiddleware::class])->group(function () {
     Route::get('/admin/panel', [AdminController::class, 'index'])->name('admin.panel');
     Route::delete('/admin/delete/{id}', [AdminController::class, 'deleteReservation'])->name('admin.delete');
     Route::get('/admin/edit/{id}', [AdminController::class, 'edit'])->name('admin.edit');
     Route::post('/admin/update/{id}', [AdminController::class, 'update'])->name('admin.update');
+
 });
 
 Route::middleware('auth')->group(function () {

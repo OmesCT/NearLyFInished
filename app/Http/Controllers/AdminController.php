@@ -27,25 +27,25 @@ class AdminController extends Controller
 
 
     public function deleteReservation($id)
-{
-    $reservation = Reservations::find($id);
+    {
+        $reservation = Reservations::find($id);
 
-    if ($reservation) {
-        // อัปเดตสถานะ available ของโต๊ะเป็น true
-        $table = Tables::find($reservation->table_id);
-        if ($table) {
-            $table->available = true;
-            $table->save();
+        if ($reservation) {
+            // อัปเดตสถานะ available ของโต๊ะเป็น true
+            $table = Tables::find($reservation->table_id);
+            if ($table) {
+                $table->available = true;
+                $table->save();
+            }
+
+            // ลบข้อมูลการจอง
+            $reservation->delete();
+
+            return redirect()->route('admin.panel')->with('success', 'Reservation deleted successfully and table is now available.');
         }
 
-        // ลบข้อมูลการจอง
-        $reservation->delete();
-
-        return redirect()->route('admin.panel')->with('success', 'Reservation deleted successfully and table is now available.');
+        return redirect()->route('admin.panel')->with('error', 'Reservation not found.');
     }
-
-    return redirect()->route('admin.panel')->with('error', 'Reservation not found.');
-}
 
 
     public function edit($id)
@@ -56,7 +56,7 @@ class AdminController extends Controller
         }
 
         return Inertia::render('Admin/Edit', [
-            'reservation' => $reservation
+            'reservation' => $reservation   
         ]);
     }
 
